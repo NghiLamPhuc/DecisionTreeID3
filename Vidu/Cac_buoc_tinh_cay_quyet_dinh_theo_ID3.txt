@@ -1,0 +1,32 @@
+Cac buoc tinh cay quyet dinh theo ID3.
+Xem du lieu ban dau la mot bang, dong dau tien la ten cac cot hay thuoc tinh,
+cac dong tiep theo la gia tri cua thuoc tinh.
+Gia su thuoc tinh phan lop co 2 gia tri, goi la duong; am.
+Tong so dong la n.
+B1: Tinh entropy cua toan bo bang:
+	Entropy(S)=-duong/n*log2(duong/n) - am/n*log2(am/n)
+B2: Chon mot thuoc tinh bat ky, A (tru thuoc tinh phan lop).
+    Tinh entropy tung gia tri (x1,x2,..) cua thuoc tinh A.
+	Entropy(A=x1)=....
+	Entropy(A=x2)=....
+    Tinh entropy trung binh cua thuoc tinh. Average Entropy information of A
+	AE(A)=count(x1)/count(S) * Entropy(A=x1) + count(x2)/count(S) * Entropy(A=x2)..
+    Tinh information gain cua thuoc tinh.
+	IG(A)=Entropy(S) - AE(A)
+Lap lai B2 cho het cac thuoc tinh (tru thuoc tinh phan lop).
+B3: Chon thuoc tinh co information gain lon nhat.
+    Cap nhat cay: thuoc tinh vua chon tam goi la nhanh quyet dinh-decision node,
+                  tu nhanh quyet dinh ve cac nhanh con-child node la cac gia tri
+                  cua thuoc tinh do.
+			A
+		      / | \
+                     x1 x2 x3
+                    /   |   \
+B4: Rut trich tu bang ban dau theo cac gia tri cua thuoc tinh vua chon 
+    lam nhanh quyet dinh.
+	Gia tri x1 se bao gom nhung dong co x1
+(*Tuong tuong cay quyet dinh ban dau chua toan bo bang, sau khi chon nhanh quyet dinh
+, cac dong cua bang se phan phoi theo tung nhanh con (gia tri cua thuoc tinh) cua
+nhanh quyet dinh)
+    Luc nay co the lap lai cac buoc B1,B2,B3 cho tung bang con.
+    Tiep tuc toi khi phan loai xong.

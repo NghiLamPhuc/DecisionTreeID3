@@ -1,6 +1,12 @@
-from Working_with_file import read_file
+from Working_with_file import read_file, write_file
 import math
 
+inputFolder = 'input'
+inputFileName = 'weather'
+outFileFolder = 'outfile'
+fileLogName = 'log'
+fileType = ['.txt']
+splitType = [', ', ' ']
 
 def count_each_value_of_attribute(objectList: list(list()), attributePos: int) -> dict:
     attrNameDict = dict()
@@ -31,13 +37,13 @@ def entropy(objectList: list(list()), classifyPos: int) -> float:
 
 
 '''
-Average Entropy Information of attribute
+Entropy of attribute A after deciding on a particular attribute B.
 - Lay danh sach cac gia tri cua thuoc tinh.
 - Rut trich cac bang con theo cac gia tri do.
-- Tinh entropy cho tung bang con.
-- Tinh Entropy trung binh.
+- Tinh entropy cho tung gia tri cua thuoc tinh.
+- Tinh Entropy toan bo gia tri cua thuoc tinh.
 '''
-def average_entropy_of_attribute(objectList: list(list()), attrPos: int, classifyPos: int) -> float:
+def entropy_by_attribute(objectList: list(list()), attrPos: int, classifyPos: int) -> float:
     entropyList = list()
     avgEntropy = 0.0
     valueCountOfAttrDict = count_each_value_of_attribute(objectList, attrPos)
@@ -47,12 +53,23 @@ def average_entropy_of_attribute(objectList: list(list()), attrPos: int, classif
     for objectListAtValue in objectListByEachValueOfAttr:
         entropyList.append(entropy(objectListAtValue, classifyPos))
     
+    entropyAtEachValue = dict()
+    for index in range(len(entropyList)):
+        entropyAtEachValue[list(valueCountOfAttrDict.keys())[index]] = entropyList[index]
+
     entropyIndex = 0
     for (valueName, count) in valueCountOfAttrDict.items():
         avgEntropy += (count/len(objectList))*entropyList[entropyIndex]
         entropyIndex += 1
 
-    return avgEntropy
+    return avgEntropy, entropyAtEachValue#list(valueCountOfAttrDict.keys())
+
+
+'''
+Information Gain.
+'''
+def information_gain(entropyOverall: float, entropyAttr: float) -> float:
+    return (entropyOverall - entropyAttr)
 
 
 '''
@@ -67,16 +84,43 @@ def extract_objectList_by_value_of_attribute(objectList: list(list()), attribute
             if objectList[objIndex][attributePos] == attrName:
                 valueOfAttrList.append(objectList[objIndex])
         objectListByEachValueOfAttr.append(valueOfAttrList)
+    
     return objectListByEachValueOfAttr
+
+def run(inputList: list, attrVisitedList: list):
+    classifyPos = -1
+    # inputList = read_file.read_csv_to_list_of_row(inputFolder, inputFileName)
+    objectList = inputList[1:]
+    attrNameList = inputList[0]
+    entropyOverall = entropy(objectList, classifyPos)
+    
+    write_file.list_to_txt_continuos(['Entropy(S):', str(entropyOverall)], outFileFolder, fileLogName, fileType[0], splitType[1])
+    
+    IGList = list()
+    attrCount = len(objectList[0]) - 2 # Tru cot stt va cot phan lop.
+    for attrIndex in range(1, attrCount + 1):
+        if attrIndex not in attrVisitedList:
+            entropyByAttr = entropy_by_attribute(objectList, attrIndex, -1)
+            entropybyValueList = entropyByAttr[1]
+            entropyAttr = entropyByAttr[0]
+            iGAttr = information_gain(entropyOverall, entropyAttr)
+            IGList.append(iGAttr)
+            write_file.list_to_txt_continuos(['IG({0}):{1}. Entropy({0}):{2}'.format(attrNameList[attrIndex], iGAttr, entropyAttr), entropybyValueList], outFileFolder, fileLogName, fileType[0], splitType[1])
+
+    write_file.list_to_txt_continuos(['Max IG({0}):'.format(attrNameList[IGList.index(max(IGList)) + 1]), max(IGList)], outFileFolder, fileLogName, fileType[0], splitType[1])
+    
+    return (attrNameList[IGList.index(max(IGList)) + 1], max(IGList))
+        
 
 
 def main():
-    print('DTID3new')
-    objectList = read_file.read_csv_to_list_of_row('./input/', 'weather')[1:]
-    attrCount = len(objectList[0]) - 1
-    # print(entropy(objectList, -1))
-    # print(extract_objectList_by_value_of_attribute(objectList, 1)[1])
-    average_entropy_of_attribute(objectList, 1, -1)
+    attrVisitedList = [0]
+    attrPos = 1
+    inputList = read_file.read_csv_to_list_of_row(inputFolder, inputFileName)
+    # print(run(inputList))
+    inputList2 = extract_objectList_by_value_of_attribute(inputList, attrPos)
+    attrNameList = inputList2[0]
+    print(run(attrNameList + inputList2[1], attrVisitedList))
 
     
 if __name__ == "__main__": main()

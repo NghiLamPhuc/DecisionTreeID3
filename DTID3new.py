@@ -44,25 +44,24 @@ Entropy of attribute A after deciding on a particular attribute B.
 - Tinh Entropy toan bo gia tri cua thuoc tinh.
 '''
 def entropy_by_attribute(objectList: list(list()), attrPos: int, classifyPos: int) -> float:
-    entropyList = list()
-    avgEntropy = 0.0
+    entropyByAttr = 0.0
     valueCountOfAttrDict = count_each_value_of_attribute(objectList, attrPos)
     
     objectListByEachValueOfAttr = extract_objectList_by_value_of_attribute(objectList, attrPos)
     
-    for objectListAtValue in objectListByEachValueOfAttr:
-        entropyList.append(entropy(objectListAtValue, classifyPos))
-    
     entropyAtEachValue = dict()
-    for index in range(len(entropyList)):
-        entropyAtEachValue[list(valueCountOfAttrDict.keys())[index]] = entropyList[index]
-
-    entropyIndex = 0
-    for (valueName, count) in valueCountOfAttrDict.items():
-        avgEntropy += (count/len(objectList))*entropyList[entropyIndex]
-        entropyIndex += 1
-
-    return avgEntropy, entropyAtEachValue#list(valueCountOfAttrDict.keys())
+    for objectListAtValue in objectListByEachValueOfAttr:
+        entrAtVal = entropy(objectListAtValue, classifyPos)
+        if entrAtVal != -1:
+            # objectListAtValue[0][attrPos]
+            # 0: first data row
+            # objectListAtValue[0][attrPos]: value of attribute
+            entropyAtEachValue[objectListAtValue[0][attrPos]] = entrAtVal
+    
+    for (valueName, entrByVal) in entropyAtEachValue.items():
+        entropyByAttr += (valueCountOfAttrDict[valueName]/len(objectList))*entrByVal
+        
+    return entropyByAttr, entropyAtEachValue#list(valueCountOfAttrDict.keys())
 
 
 '''
@@ -87,6 +86,15 @@ def extract_objectList_by_value_of_attribute(objectList: list(list()), attribute
     
     return objectListByEachValueOfAttr
 
+def get_max_of_dict(inpDict: dict):
+    maxV = -1
+    maxK = ''
+    for (k,v) in inpDict.items():
+        if v > maxV:
+            maxV = v
+            maxK = k
+    return (maxK, maxV)
+
 def run(inputList: list, attrVisitedList: list):
     classifyPos = -1
     # inputList = read_file.read_csv_to_list_of_row(inputFolder, inputFileName)
@@ -96,7 +104,8 @@ def run(inputList: list, attrVisitedList: list):
     
     write_file.list_to_txt_continuos(['Entropy(S):', str(entropyOverall)], outFileFolder, fileLogName, fileType[0], splitType[1])
     
-    IGList = list()
+    # IGList = list()
+    IGDict = dict()
     attrCount = len(objectList[0]) - 2 # Tru cot stt va cot phan lop.
     for attrIndex in range(1, attrCount + 1):
         if attrIndex not in attrVisitedList:
@@ -104,20 +113,25 @@ def run(inputList: list, attrVisitedList: list):
             entropybyValueList = entropyByAttr[1]
             entropyAttr = entropyByAttr[0]
             iGAttr = information_gain(entropyOverall, entropyAttr)
-            IGList.append(iGAttr)
+            # IGList.append(iGAttr)
+            IGDict[attrNameList[attrIndex]] = iGAttr
             write_file.list_to_txt_continuos(['IG({0}):{1}. Entropy({0}):{2}'.format(attrNameList[attrIndex], iGAttr, entropyAttr), entropybyValueList], outFileFolder, fileLogName, fileType[0], splitType[1])
 
-    write_file.list_to_txt_continuos(['Max IG({0}):'.format(attrNameList[IGList.index(max(IGList)) + 1]), max(IGList)], outFileFolder, fileLogName, fileType[0], splitType[1])
+    (attrMaxName, maxIG) = get_max_of_dict(IGDict)
+
+    write_file.list_to_txt_continuos(['Max IG({0}):'.format(attrMaxName), maxIG], outFileFolder, fileLogName, fileType[0], splitType[1])
     
-    return (attrNameList[IGList.index(max(IGList)) + 1], max(IGList))
+    return (attrMaxName, maxIG)
         
 
 
 def main():
-    attrVisitedList = [0]
+    attrVisitedList = [0, -1]
     attrPos = 1
     inputList = read_file.read_csv_to_list_of_row(inputFolder, inputFileName)
-    # print(run(inputList))
+    print(run(inputList, attrVisitedList))
+    attrVisitedList.append(1)
+    attrPos += 1
     inputList2 = extract_objectList_by_value_of_attribute(inputList, attrPos)
     attrNameList = inputList2[0]
     print(run(attrNameList + inputList2[1], attrVisitedList))

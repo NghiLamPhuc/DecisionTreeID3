@@ -22,8 +22,11 @@ class TreeNode():
         self.listAttrFlag[-1] = -1
         self.entropy = 0.0
         self.infoGain = 0.0
+    
+    def _display_childs(self):
+        for (value, child) in self.childs.items():
+            print('-{0}-> {1}'.format(value, child.name))
         
-
 class DTreeID3():
     def __init__(self, listInput: list, posClassAttr: int):
         self.root = None
@@ -34,6 +37,8 @@ class DTreeID3():
         self.totalAttr = len(self.listAttrName)
         self.totalObject = len(self.listData) - 1
         self.countObjectClassified = 0
+
+        self.listBranchStr = list()
         
     def _calc_entropy(self, listObject: list) -> float:
         entropy = 0.0
@@ -100,7 +105,7 @@ class DTreeID3():
             dictInfoGainAttr[nameAttr] = infoGain
             print('Information Gain({0}): {1}\n'.format(nameAttr, infoGain))
         (attr, ig) = _get_max_of_dict(dictInfoGainAttr)
-        print('MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
+        print('============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
 
         self.root = TreeNode(attr, self.totalAttr)
         self.root.isLeaf = False
@@ -127,12 +132,11 @@ class DTreeID3():
             prevNode.childs[valueOfAttr] = child
             
             self.countObjectClassified += len(listObject)
-            print('Leaf: {0}    ============\n'.format(child.name))
-            # return child
+            print('============    Leaf: {0}    ============\n'.format(child.name))
+
         else:
             dictInfoGainAttr = dict()
             dictEntropyAttr = dict()
-            # TIm danh sach thuoc tinh can tinh entropy
             listAttrFlag = prevNode.listAttrFlag
             for nameAttr in self.listAttrName:
                 if listAttrFlag[self.listAttrName.index(nameAttr)] == 0:
@@ -142,7 +146,7 @@ class DTreeID3():
                     dictInfoGainAttr[nameAttr] = infoGain
                     print('Information Gain({0}): {1}\n'.format(nameAttr, infoGain))
             (attr, ig) = _get_max_of_dict(dictInfoGainAttr)
-            print('MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
+            print('============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
 
             child = TreeNode(attr, self.totalAttr)
             child.listAttrFlag = prevNode.listAttrFlag.copy()
@@ -173,8 +177,34 @@ class DTreeID3():
             queueSepNode.extend(self._find_list_separate_node(sepNode))
 
     def _display_tree(self):
+        self._set_root_branch()
+        for (value, rootChild) in self.root.childs.items():
+            curStr = self.listBranchStr.pop(0)
+            if rootChild.isLeaf:
+                self.listBranchStr.append(curStr)
+                continue
+            listCopyCurStr = list()
+            for i in range(len(rootChild.childs)):
+                listCopyCurStr.append(curStr)
+            self._display_separate_node(rootChild, listCopyCurStr)
+
+    def _set_root_branch(self):
+        for (value, child) in self.root.childs.items():
+            if child.isLeaf:
+                branchStr = '{0}: {1}: {2}.'.format(self.root.name, value, child.name)
+            else:
+                branchStr = '{0}: {1}: {2}: '.format(self.root.name, value, child.name)
+            self.listBranchStr.append(branchStr)
+
+    def _display_separate_node(self, node: TreeNode, listCurStr: list):
+        i = 0
+        for (value, childNode) in node.childs.items():
+            listCurStr[i] += '{0}: {1}.'.format(value, childNode.name)
+            i += 1
+        self.listBranchStr.extend(listCurStr)
+        
+    def _predict(self):
         pass
-            
 
 def _get_max_of_dict(d: dict):
     max = 0
@@ -199,15 +229,13 @@ def _read_file(inputFolder: str, inputFileName: str) -> list:
     inputList = read_file.read_csv_to_list_of_row(inputFolder, inputFileName)
     return inputList
 
-
 def main():
     listData = _read_file(folderInput, fileInput[0])
     indexClassifyAttribute = -1
     id3 = DTreeID3(listData, indexClassifyAttribute)
     id3._run()
     id3._display_tree()
-    print()
-
+    print(*id3.listBranchStr, sep='\n')
     
 
 if __name__ == "__main__": main()

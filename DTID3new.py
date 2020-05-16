@@ -1,6 +1,7 @@
 from Working_with_file import read_file, write_file, make_folder
 import math
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 folderInput = 'input'
 fileInput = ['weather', 'Bai2', 'BuyComputer', 'BHK']
@@ -22,10 +23,6 @@ class TreeNode():
         self.listAttrFlag[-1] = -1
         self.entropy = 0.0
         self.infoGain = 0.0
-    
-    def _display_childs(self):
-        for (value, child) in self.childs.items():
-            print('-{0}-> {1}'.format(value, child.name))
         
 class DTreeID3():
     def __init__(self, listInput: list, posClassAttr: int):
@@ -38,6 +35,7 @@ class DTreeID3():
         self.totalObject = len(self.listData) - 1
         self.countObjectClassified = 0
 
+        self.log = ''
         self.listBranchStr = list()
         
     def _calc_entropy(self, listObject: list) -> float:
@@ -88,24 +86,32 @@ class DTreeID3():
             entropyVal = self._calc_entropy(listObjectByValue)
             dictEntropyOfValue[value] = entropyVal
             
-            probAppearance = len(listObjectByValue)/self.totalObject
-            entropyAttr += probAppearance*entropyVal
-        print('Entropy({0}) : {1}'.format(nameAttr, entropyAttr))
-        print(dictEntropyOfValue)
+            probAppearance = len(listObjectByValue) / self.totalObject
+            entropyAttr += probAppearance * entropyVal
+
+        # print('Entropy({0}) : {1}'.format(nameAttr, entropyAttr))
+        # print(dictEntropyOfValue)
+
+        self.log += 'Entropy({0}) : {1}\n'.format(nameAttr, entropyAttr)
+        self.log += _get_str_of_dict(dictEntropyOfValue) + '\n'
+
         return (entropyAttr, dictEntropyOfValue)
 
     def _set_root(self):
         entropyS = self._calc_entropy(self.listObject)
-        print('Entropy(S): {0}'.format(entropyS))
+        # print('Entropy(S): {0}'.format(entropyS))
+        self.log += 'Entropy(S): {0}\n'.format(entropyS)
         dictInfoGainAttr = dict()
         listAttrName = self.listAttrName[1:self.totalAttr-1]
         for nameAttr in listAttrName:
             (entropyAttr, dictEntropyOfValue) = self._calc_entropy_attribute(self.listObject, nameAttr)
             infoGain = entropyS - entropyAttr
             dictInfoGainAttr[nameAttr] = infoGain
-            print('Information Gain({0}): {1}\n'.format(nameAttr, infoGain))
+            # print('Information Gain({0}): {1}\n'.format(nameAttr, infoGain))
+            self.log += 'Information Gain({0}): {1}\n'.format(nameAttr, infoGain)
         (attr, ig) = _get_max_of_dict(dictInfoGainAttr)
-        print('============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
+        # print('============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
+        self.log += '============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig)
 
         self.root = TreeNode(attr, self.totalAttr)
         self.root.isLeaf = False
@@ -119,20 +125,23 @@ class DTreeID3():
         valueOfAttr = listObject[0][self.listAttrName.index(namePrevAttr)]
 
         entropyS = self._calc_entropy(listObject)
-        print('Entropy({0}={1}): {2}'.format(namePrevAttr, valueOfAttr, entropyS))
+        # print('Entropy({0}={1}): {2}'.format(namePrevAttr, valueOfAttr, entropyS))
+        self.log += 'Entropy({0}={1}): {2}\n'.format(namePrevAttr, valueOfAttr, entropyS)
+
+        child = TreeNode('', self.totalAttr)
+        child.listAttrFlag = prevNode.listAttrFlag.copy()
+        child.listAttrFlag[self.listAttrName.index(namePrevAttr)] = 1
+        child.listObject = listObject
 
         if entropyS == 0:
             classifyValueName = listObject[0][-1]
-            child = TreeNode(classifyValueName, self.totalAttr)
-            child.listAttrFlag = prevNode.listAttrFlag.copy()
-            child.listAttrFlag[self.listAttrName.index(namePrevAttr)] = 1
-            child.listObject = listObject
+            
+            child.name = classifyValueName
             child.isLeaf = True
             
-            prevNode.childs[valueOfAttr] = child
-            
             self.countObjectClassified += len(listObject)
-            print('============    Leaf: {0}    ============\n'.format(child.name))
+            # print('============    Leaf: {0}    ============\n'.format(child.name))
+            self.log += '============    Leaf: {0}    ============\n'.format(child.name)
 
         else:
             dictInfoGainAttr = dict()
@@ -144,18 +153,17 @@ class DTreeID3():
                     infoGain = entropyS - entropyAttr
                     dictEntropyAttr[nameAttr] = entropyAttr
                     dictInfoGainAttr[nameAttr] = infoGain
-                    print('Information Gain({0}): {1}\n'.format(nameAttr, infoGain))
+                    # print('Information Gain({0}): {1}\n'.format(nameAttr, infoGain))
+                    self.log += 'Information Gain({0}): {1}\n'.format(nameAttr, infoGain)
             (attr, ig) = _get_max_of_dict(dictInfoGainAttr)
-            print('============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
+            # print('============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig))
+            self.log += '============    MAX(ig): {0}: {1}    ============\n'.format(attr, ig)
 
-            child = TreeNode(attr, self.totalAttr)
-            child.listAttrFlag = prevNode.listAttrFlag.copy()
-            child.listAttrFlag[self.listAttrName.index(namePrevAttr)] = 1
-            child.listObject = listObject
+            child.name = attr
             child.entropy = dictEntropyAttr[attr]
             child.infoGain = ig
             
-            prevNode.childs[valueOfAttr] = child
+        prevNode.childs[valueOfAttr] = child
         
         return child
         
@@ -175,8 +183,10 @@ class DTreeID3():
         while queueSepNode:
             sepNode = queueSepNode.pop(0)
             queueSepNode.extend(self._find_list_separate_node(sepNode))
+        
+        write_file._str_to_txt(self.log, folderOutFile, fileLog, fileType[0])
 
-    def _display_tree(self):
+    def _get_all_branch(self):
         self._set_root_branch()
         for (value, rootChild) in self.root.childs.items():
             curStr = self.listBranchStr.pop(0)
@@ -186,7 +196,7 @@ class DTreeID3():
             listCopyCurStr = list()
             for i in range(len(rootChild.childs)):
                 listCopyCurStr.append(curStr)
-            self._display_separate_node(rootChild, listCopyCurStr)
+            self._set_separate_node_branch(rootChild, listCopyCurStr)
 
     def _set_root_branch(self):
         for (value, child) in self.root.childs.items():
@@ -196,46 +206,74 @@ class DTreeID3():
                 branchStr = '{0}: {1}: {2}: '.format(self.root.name, value, child.name)
             self.listBranchStr.append(branchStr)
 
-    def _display_separate_node(self, node: TreeNode, listCurStr: list):
+    def _set_separate_node_branch(self, node: TreeNode, listCurStr: list):
         i = 0
         for (value, childNode) in node.childs.items():
             listCurStr[i] += '{0}: {1}.'.format(value, childNode.name)
             i += 1
         self.listBranchStr.extend(listCurStr)
         
-    def _predict(self):
-        pass
+    def _predict(self, newInpStr: str):
+        (listNewVal, listNewValFlag) = self._predict_preprocessing(newInpStr)
+        return self._predict_run(listNewVal, listNewValFlag, self.root)
 
-def _get_max_of_dict(d: dict):
+    '''
+    Check flag all = 1 --> cannot predict
+    If new Value has null
+    
+    '''
+    def _predict_run(self, listNewValue: list, listNewValueFlag: list, node: TreeNode):
+        if node.isLeaf:
+            return node.name
+        for index in range(0, len(listNewValue)):
+            if listNewValueFlag[index] == 0:
+                for (value, childNode) in node.childs.items():
+                    if listNewValue[index] == value:
+                        if self.listAttrName.index(node.name) == (index + 1):
+                            listNewValueFlag[index] = 1
+                            return self._predict_run(listNewValue, listNewValueFlag, childNode)
+
+    def _predict_preprocessing(self, newInpStr: str) -> (list, list):
+        listNewValue = newInpStr.rstrip().lstrip().split()
+        listNewValueFlag = list()
+        for _ in range(len(listNewValue)):
+            listNewValueFlag.append(0)
+        return (listNewValue, listNewValueFlag)
+        
+def _get_max_of_dict(d: dict) -> (str, float):
     max = 0
     key = -1
-    for (k,v) in d.items():
+    for (k, v) in d.items():
         if v > max:
             max = v
             key = k
     return (key, max)
 
-def _get_min_of_dict(d: dict):
-    min = 0
-    key = -1
-    for (k,v) in d.items():
-        if v < min:
-            min = v
-            key = k
-    return (key, min)
-    
+def _get_str_of_dict(d: dict) -> str:
+    s = ''
+    for (k, v) in d.items():
+        s += '{0}: {1}; '.format(k, v)
+    return s
 
 def _read_file(inputFolder: str, inputFileName: str) -> list:
     inputList = read_file.read_csv_to_list_of_row(inputFolder, inputFileName)
     return inputList
 
 def main():
+    start = datetime.now()
+
     listData = _read_file(folderInput, fileInput[0])
     indexClassifyAttribute = -1
     id3 = DTreeID3(listData, indexClassifyAttribute)
     id3._run()
-    id3._display_tree()
-    print(*id3.listBranchStr, sep='\n')
+    id3._get_all_branch()
+    # print(*id3.listBranchStr, sep='\n')
+    newInpStr1 = 'rainy null high strong'
+    newInpStr2 = 'rainy hot normal weak'
+    print(id3._predict(newInpStr2))
+
+    exeTime = (datetime.now() - start).total_seconds()
+    print(str(timedelta(seconds = exeTime)))
     
 
 if __name__ == "__main__": main()

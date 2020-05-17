@@ -13,15 +13,24 @@ class MyWindow(QtWidgets.QMainWindow):
         uic.loadUi('DTID3_GUI.ui', self)
         self.model = QtGui.QStandardItemModel(self)
 
+        self._set_icon()
+
         self.btnImport.clicked.connect(self.on_Import_clicked)
         self.btnExport.clicked.connect(self.on_Export_clicked)
         self.btnSave.clicked.connect(self.on_Save_clicked)
         self.btnAdd.clicked.connect(self.on_Add_clicked)
         self.btnId3.clicked.connect(self.on_Id3_clicked)
         self.btnPredict.clicked.connect(self.on_Predict_clicked)
-        self.lineEditPredict.setDisabled(True)
         self.lineEditPredict.textChanged.connect(self.on_textchanged)
         self.tableViewInput.setModel(self.model)
+
+        self.lineEditPredict.setDisabled(True)
+        self.btnExport.setDisabled(True)
+        self.btnSave.setDisabled(True)
+        self.btnAdd.setDisabled(True)
+        self.btnId3.setDisabled(True)
+        self.btnPredict.setDisabled(True)
+        
         # self.tableViewInput.horizontalHeader().setStretchLastSection(True) #optional
 
         self.fileName = ''
@@ -30,6 +39,26 @@ class MyWindow(QtWidgets.QMainWindow):
         self.posClassify = -1
         self.tree = DTID3_Class.DTreeID3(self.posClassify)
 
+    def _set_icon(self):
+        imgDir = './GUI_image/'
+        openIcon = QtGui.QIcon(imgDir + 'openIcon')
+        saveIcon = QtGui.QIcon(imgDir + 'saveIcon')
+        saveAsIcon = QtGui.QIcon(imgDir + 'saveAsIcon')
+        runIcon = QtGui.QIcon(imgDir + 'runIcon')
+        pixmapLogo = QtGui.QPixmap(imgDir + 'logoIconLarge')
+        resIcon = QtGui.QIcon(imgDir + 'saveResIcon')
+        addRowIcon = QtGui.QIcon(imgDir + 'addRowIcon')
+        deleteRowIcon = QtGui.QIcon(imgDir + 'deleteRowIcon')
+        predictIcon = QtGui.QIcon(imgDir + 'predictIcon')
+
+        self.btnImport.setIcon(openIcon)
+        self.btnExport.setIcon(saveAsIcon)
+        self.btnSave.setIcon(saveIcon)
+        self.btnId3.setIcon(runIcon)
+        self.btnAdd.setIcon(addRowIcon)
+        self.btnDelete.setIcon(deleteRowIcon)
+        self.btnPredict.setIcon(predictIcon)        
+        self.labelLogo.setPixmap(pixmapLogo)
         
     def on_textchanged(self):
         self.labelPredict.clear()
@@ -90,25 +119,16 @@ class MyWindow(QtWidgets.QMainWindow):
         if dataPath:
             self.model.clear()
             self._import_file(self.fileName)
-            self.btnExport.setDisabled = False
-
+            
             self.listInput = self._get_list_from_QStandardItemModel()
 
             self.plainTextDTree.clear()
             
+            self.btnExport.setDisabled(False)
+            self.btnAdd.setDisabled(False)
+            self.btnId3.setDisabled(False)
+            self.btnSave.setDisabled(False)
             
-
-            # # Hint bang placeholdertext cho o lineEditText.
-            # firstValueRow = list(dataFrame.iloc[0])[:len(list(dataFrame.iloc[0])) - 1]
-            # firstRowStr = 'Ví dụ : '
-            # for value in range(len(firstValueRow) - 1):
-            #     firstRowStr += str(firstValueRow[value]) + ','
-            # firstRowStr += str(firstValueRow[-1])
-            # firstRowStr = firstRowStr.rstrip()
-            # self.lineEditPredict.setPlaceholderText(firstRowStr)
-            # # set enabled lineeditPredict
-            # self.lineEditPredict.setDisabled(False)
-
 
     def on_Id3_clicked(self):
         self.tree = DTID3_Class.DTreeID3(self.posClassify)
@@ -120,28 +140,22 @@ class MyWindow(QtWidgets.QMainWindow):
             strAllBranch += branch + '\n' 
         self.plainTextDTree.insertPlainText(strAllBranch)
         # Hint ở ô dự đoán dữ liệu mới.
-
+        strHint = 'Ví dụ:'
+        for index in range(1, len(self.tree.listObject[0]) - 1):
+            strHint += ' ' + self.tree.listObject[0][index]
         
-    def on_Predict_clicked(self):
-        instanceDict = dict()
-        instanceStr = self.lineEditPredict.text()
-        if not instanceStr:
-            self.labelPredict.setText('Chưa nhập giá trị.')
-        if not self.tree:
-            self.labelPredict.setText('Chưa có cây quyết định.')
-        if instanceStr:
-            instanceList = instanceStr.split(',')
-            for index in range(len(self.attributes)):
-                instanceDict[self.attributes[index]] = instanceList[index]
+        self.lineEditPredict.setPlaceholderText(strHint)
+        self.lineEditPredict.setDisabled(False)
+        self.btnPredict.setDisabled(False)
 
-            instanceDict = pd.Series(instanceDict)
-            predictInstance = ID3.predict(instanceDict, self.tree)
-            self.labelPredict.setText('-->{}   '.format(predictInstance))
-            make_folder.create_folder('./Output/')
-            predictNameFile = 'predict ' + self.labelInputName.text() + '.txt'
-            with open('./Output/' + predictNameFile, 'a', encoding = 'utf-8') as f:
-                f.write(instanceStr + '-->{}\n'.format(predictInstance))
-                
+
+    def on_Predict_clicked(self):
+        newValueStr = self.lineEditPredict.text()
+        if newValueStr == '':
+            self.labelPredict.setText('Chưa nhập giá trị.')
+        else:
+            res = self.tree._predict(newValueStr)
+            self.labelPredict.setText('--> {}  '.format(res))
 
 
 if __name__ == '__main__':

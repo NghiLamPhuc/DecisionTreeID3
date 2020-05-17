@@ -4,7 +4,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 folderInput = 'input'
-fileInput = ['weather', 'Bai2', 'BuyComputer', 'BHK']
+fileInput = ['weather', 'Bai2', 'BuyComputer', 'BHK', 'W']
 folderOutFile = 'outfile'
 fileLog = 'log'
 fileType = ['.txt']
@@ -272,7 +272,7 @@ def _read_file(inputFolder: str, inputFileName: str) -> list:
 def main():
     start = datetime.now()
 
-    listData = _read_file(folderInput, fileInput[0])
+    listData = _read_file(folderInput, fileInput[-1])
     indexClassifyAttribute = -1
     id3 = DTreeID3(indexClassifyAttribute)
     id3._set_inputData(listData)

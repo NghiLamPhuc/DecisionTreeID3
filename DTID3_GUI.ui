@@ -13,7 +13,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>926</width>
+    <width>927</width>
     <height>945</height>
    </rect>
   </property>
@@ -576,7 +576,7 @@
                 <enum>Qt::LeftToRight</enum>
                </property>
                <property name="text">
-                <string>Mở tệp dữ liệu</string>
+                <string>  Mở tệp   </string>
                </property>
                <property name="default">
                 <bool>true</bool>
@@ -599,7 +599,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Lưu tệp dữ liệu</string>
+                <string>  Lưu tệp   </string>
                </property>
               </widget>
              </item>
@@ -641,7 +641,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Xóa dòng</string>
+                <string>  Xóa dòng</string>
                </property>
               </widget>
              </item>
@@ -789,7 +789,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Tạo cây</string>
+              <string> Tạo cây  </string>
              </property>
              <property name="default">
               <bool>true</bool>
@@ -807,7 +807,7 @@
               </font>
              </property>
              <property name="text">
-              <string>    Phân lớp    </string>
+              <string> Dự đoán  </string>
              </property>
             </widget>
            </item>

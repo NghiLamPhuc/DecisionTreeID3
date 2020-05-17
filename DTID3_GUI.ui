@@ -589,7 +589,7 @@
              <item>
               <widget class="QPushButton" name="btnExport">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="font">
                 <font>
@@ -604,9 +604,21 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="btnSave">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Lưu dữ liệu</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="btnAdd">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="font">
                 <font>

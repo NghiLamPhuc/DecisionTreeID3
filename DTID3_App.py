@@ -6,6 +6,7 @@ from Working_with_file import make_folder
 import pandas as pd
 import pprint
 import json
+from PyQt5.QtWidgets import QDialog, QMessageBox, QPlainTextEdit, QVBoxLayout
 
 class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -22,6 +23,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.btnId3.clicked.connect(self.on_Id3_clicked)
         self.btnPredict.clicked.connect(self.on_Predict_clicked)
         self.lineEditPredict.textChanged.connect(self.on_textchanged)
+        self.btnLog.clicked.connect(self.on_Log_clicked)
         self.tableViewInput.setModel(self.model)
 
         self.lineEditPredict.setDisabled(True)
@@ -30,6 +32,11 @@ class MyWindow(QtWidgets.QMainWindow):
         self.btnAdd.setDisabled(True)
         self.btnId3.setDisabled(True)
         self.btnPredict.setDisabled(True)
+        self.btnLog.setDisabled(True)
+
+        # self.plainTextDTree.setDisabled(False)
+        # self.plainTextDTree.centerOnScroll()
+        
         
         # self.tableViewInput.horizontalHeader().setStretchLastSection(True) #optional
 
@@ -50,6 +57,7 @@ class MyWindow(QtWidgets.QMainWindow):
         addRowIcon = QtGui.QIcon(imgDir + 'addRowIcon')
         deleteRowIcon = QtGui.QIcon(imgDir + 'deleteRowIcon')
         predictIcon = QtGui.QIcon(imgDir + 'predictIcon')
+        logIcon = QtGui.QIcon(imgDir + 'logIcon')
 
         self.btnImport.setIcon(openIcon)
         self.btnExport.setIcon(saveAsIcon)
@@ -58,7 +66,10 @@ class MyWindow(QtWidgets.QMainWindow):
         self.btnAdd.setIcon(addRowIcon)
         self.btnDelete.setIcon(deleteRowIcon)
         self.btnPredict.setIcon(predictIcon)        
+        self.btnLog.setIcon(logIcon)
+        
         self.labelLogo.setPixmap(pixmapLogo)
+        
         
     def on_textchanged(self):
         self.labelPredict.clear()
@@ -109,7 +120,6 @@ class MyWindow(QtWidgets.QMainWindow):
             listInput.append(row)
         return listInput
         
-
     def on_Import_clicked(self):
         self.labelInputCount.clear()
         self.labelInputName.setText('Dữ liệu')
@@ -123,11 +133,14 @@ class MyWindow(QtWidgets.QMainWindow):
             self.listInput = self._get_list_from_QStandardItemModel()
 
             self.plainTextDTree.clear()
-            
+            self.lineEditPredict.setPlaceholderText('')
+            self.labelDTree.clear()
+
             self.btnExport.setDisabled(False)
             self.btnAdd.setDisabled(False)
             self.btnId3.setDisabled(False)
             self.btnSave.setDisabled(False)
+            self.lineEditPredict.setDisabled(True)
             
 
     def on_Id3_clicked(self):
@@ -139,6 +152,7 @@ class MyWindow(QtWidgets.QMainWindow):
         for branch in self.tree.listBranchStr:
             strAllBranch += branch + '\n' 
         self.plainTextDTree.insertPlainText(strAllBranch)
+        self.labelDTree.setText('{} nhánh.'.format(len(self.tree.listBranchStr)))
         # Hint ở ô dự đoán dữ liệu mới.
         strHint = 'Ví dụ:'
         for index in range(1, len(self.tree.listObject[0]) - 1):
@@ -147,6 +161,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.lineEditPredict.setPlaceholderText(strHint)
         self.lineEditPredict.setDisabled(False)
         self.btnPredict.setDisabled(False)
+        self.btnLog.setDisabled(False)
 
 
     def on_Predict_clicked(self):
@@ -156,6 +171,9 @@ class MyWindow(QtWidgets.QMainWindow):
         else:
             res = self.tree._predict(newValueStr)
             self.labelPredict.setText('--> {}  '.format(res))
+
+    def on_Log_clicked(self):
+        pass
 
 
 if __name__ == '__main__':

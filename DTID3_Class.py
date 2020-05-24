@@ -2,14 +2,14 @@ from Working_with_file import read_file, write_file, make_folder
 import math
 from collections import defaultdict
 from datetime import datetime, timedelta
+import String_init
 
-folderInput = 'input'
-fileInput = ['weather', 'Bai2', 'BuyComputer', 'BHK', 'W']
-folderOutFile = 'outfile'
-fileLog = 'log'
-fileType = ['.txt']
-splitType = [', ', ' ']
-
+# folderInput = 'input'
+# fileInput = ['weather', 'Bai2', 'BuyComputer', 'BHK', 'W']
+# folderOutFile = 'outfile'
+# fileLog = 'log'
+# fileType = ['.txt']
+# splitType = [', ', ' ']
 class TreeNode():
     def __init__(self, name: str, sizeListFlag: int):
         self.name = name
@@ -191,7 +191,7 @@ class DTreeID3():
             sepNode = queueSepNode.pop(0)
             queueSepNode.extend(self._find_list_separate_node(sepNode))
         
-        write_file._str_to_txt(self.log, folderOutFile, fileLog, fileType[0])
+        write_file._str_to_txt(self.log, String_init.folderOutFile, String_init.fileLog, String_init.fileType[0])
 
     def _get_all_branch(self):
         self._set_root_branch()
@@ -223,7 +223,7 @@ class DTreeID3():
     def _predict(self, newInpStr: str):
         (listNewVal, listNewValFlag) = self._predict_preprocessing(newInpStr)
         res = self._predict_run(listNewVal, listNewValFlag, self.root)
-        write_file._str_to_txt('{} --> {}'.format(newInpStr, res), folderOutFile, fileName=newInpStr, fileType='.txt')
+        write_file._str_to_txt('{} --> {}'.format(newInpStr, res), String_init.folderOutFile, fileName=newInpStr, fileType='.txt')
         return res
 
 
@@ -249,6 +249,9 @@ class DTreeID3():
         for _ in range(len(listNewValue)):
             listNewValueFlag.append(0)
         return (listNewValue, listNewValueFlag)
+
+    def _display_pretty_tree(self):
+        pass
         
 def _get_max_of_dict(d: dict) -> (str, float):
     max = 0
@@ -272,7 +275,7 @@ def _read_file(inputFolder: str, inputFileName: str) -> list:
 def main():
     start = datetime.now()
 
-    listData = _read_file(folderInput, fileInput[-1])
+    listData = _read_file(String_init.folderInput, String_init.fileInput[-1])
     indexClassifyAttribute = -1
     id3 = DTreeID3(indexClassifyAttribute)
     id3._set_inputData(listData)

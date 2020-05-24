@@ -641,7 +641,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>  Xóa dòng</string>
+                <string> Xóa dòng </string>
                </property>
               </widget>
              </item>
@@ -690,7 +690,7 @@
              <item>
               <widget class="QPlainTextEdit" name="plainTextDTree">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="font">
                 <font>
@@ -700,12 +700,28 @@
                <property name="layoutDirection">
                 <enum>Qt::RightToLeft</enum>
                </property>
+               <property name="verticalScrollBarPolicy">
+                <enum>Qt::ScrollBarAsNeeded</enum>
+               </property>
                <property name="plainText">
                 <string/>
                </property>
               </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelDTree">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+               <italic>true</italic>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
            </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -727,25 +743,29 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEditPredict">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="inputMethodHints">
-                <set>Qt::ImhPreferLatin|Qt::ImhSensitiveData</set>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="readOnly">
-                <bool>false</bool>
-               </property>
-               <property name="placeholderText">
-                <string/>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QLineEdit" name="lineEditPredict">
+                 <property name="font">
+                  <font>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnPredict">
+                 <property name="font">
+                  <font>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Kết quả</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
               <widget class="QLabel" name="labelPredict">
@@ -800,14 +820,29 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btnPredict">
+            <widget class="QPushButton" name="btnLog">
              <property name="font">
               <font>
                <pointsize>14</pointsize>
               </font>
              </property>
              <property name="text">
-              <string> Dự đoán  </string>
+              <string> Chi tiết  </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>button</string>
              </property>
             </widget>
            </item>

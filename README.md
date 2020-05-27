@@ -2,3 +2,4 @@
 Simple decision tree ID3.
 
 ![App](./giaodien.PNG)
+

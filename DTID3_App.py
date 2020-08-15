@@ -44,7 +44,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.inputDir = './input/'
         self.listInput = []
         self.posClassify = -1
-        self.tree = DTID3_Class.DTreeID3(self.posClassify)
+        self.tree = None#DTID3_Class.DTreeID3(self.posClassify)
 
     def _set_icon(self):
         imgDir = './GUI_image/'
@@ -144,13 +144,11 @@ class MyWindow(QtWidgets.QMainWindow):
             
 
     def on_Id3_clicked(self):
-        self.tree = DTID3_Class.DTreeID3(self.posClassify)
-        self.tree._set_inputData(self.listInput)
-        self.tree._run()
-        self.tree._get_all_branch()
+        self.tree = DTID3_Class.DTreeID3(self.listInput, self.posClassify)
         strAllBranch = ''
         for branch in self.tree.listBranchStr:
             strAllBranch += branch + '\n' 
+        self.plainTextDTree.clear()
         self.plainTextDTree.insertPlainText(strAllBranch)
         self.labelDTree.setText('{} nhánh.'.format(len(self.tree.listBranchStr)))
         # Hint ở ô dự đoán dữ liệu mới.

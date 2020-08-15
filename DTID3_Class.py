@@ -17,17 +17,16 @@ class TreeNode():
         self.childs = dict() # dict of treenode (k:value of Attribute, v:TreeNode)
         self.listObject = None
         self.listAttrFlag = list()
-        for i in range(sizeListFlag):
-            self.listAttrFlag.append(0)
+        self.listAttrFlag = [0]*sizeListFlag
         self.listAttrFlag[0] = -1
         self.listAttrFlag[-1] = -1
         self.entropy = 0.0
         self.infoGain = 0.0
         
 class DTreeID3():
-    def __init__(self, posClassAttr: int):
+    def __init__(self, listData: list, posClassAttr: int):
         self.root = None
-        self.listData = []
+        self.listData = listData
         self.listAttrName = []
         self.listObject = []
         self.indexClassifyAttr = posClassAttr
@@ -37,9 +36,11 @@ class DTreeID3():
 
         self.log = ''
         self.listBranchStr = list()
+
+        self._run()
+        self._get_all_branch()
     
-    def _set_inputData(self, inputList: list):
-        self.listData = inputList
+    def _set_inputData(self):
         self.listAttrName = self.listData[0]
         self.listObject = self.listData[1:]
         self.totalAttr = len(self.listAttrName)
@@ -53,8 +54,8 @@ class DTreeID3():
         for (value, count) in dictValueClassifyCount.items():
             if count == totalObject:
                 return 0.0
-            prob = count/totalObject # K can rang buoc vi kiem tra listData tu luc bat dau
-            entropy -= prob*(math.log2(prob))
+            prob = count / totalObject # K can rang buoc vi kiem tra listData tu luc bat dau
+            entropy -= prob * (math.log2(prob))
 
         return entropy
 
@@ -63,24 +64,17 @@ class DTreeID3():
         indexAttr = self.listAttrName.index(nameAttr)
         for row in listObject:
             value = row[indexAttr]
-            if value not in dictValueCount:
-                dictValueCount[value] = 1
-            else:
-                dictValueCount[value] += 1
+            if value not in dictValueCount: dictValueCount[value] = 1
+            else: dictValueCount[value] += 1
         return dictValueCount
 
     def _extract_object_by_value_of_attribute(self, listObject: list, nameAttr: str) -> list:
-        listObjectEachValue = list()
-        listValue = list()
+        listObjectEachValue = list();listValue = list()
         indexAttr = self.listAttrName.index(nameAttr)
         for row in listObject:
             value = row[indexAttr]
-            if value not in listValue:
-                listValue.append(value)
-                listObjectEachValue.append([row])
-            else:
-                indexValue = listValue.index(value)
-                listObjectEachValue[indexValue].append(row)
+            if value not in listValue: listValue.append(value);listObjectEachValue.append([row])
+            else: indexValue = listValue.index(value);listObjectEachValue[indexValue].append(row)
         return (listObjectEachValue, listValue)
 
     def _calc_entropy_attribute(self, listObject: list, nameAttr: str):
@@ -185,6 +179,7 @@ class DTreeID3():
         return listSepNode
 
     def _run(self):
+        self._set_inputData()
         self._set_root()
         queueSepNode = self._find_list_separate_node(self.root)
         while queueSepNode:
@@ -275,19 +270,16 @@ def _read_file(inputFolder: str, inputFileName: str) -> list:
 def main():
     start = datetime.now()
 
-    listData = _read_file(String_init.folderInput, String_init.fileInput[-1])
+    listData = _read_file(String_init.folderInput, String_init.fileInput[0])
     indexClassifyAttribute = -1
-    id3 = DTreeID3(indexClassifyAttribute)
-    id3._set_inputData(listData)
-    id3._run()
-    id3._get_all_branch()
-    # print(*id3.listBranchStr, sep='\n')
-    newInpStr1 = 'rainy null high strong'
-    newInpStr2 = 'rainy hot normal weak'
-    print(id3._predict(newInpStr2))
+    id3 = DTreeID3(listData, indexClassifyAttribute)
+    print(*id3.listBranchStr, sep='\n')
+    # newInpStr1 = 'rainy null high strong'
+    # newInpStr2 = 'rainy hot normal weak'
+    # print(id3._predict(newInpStr2))
 
-    exeTime = (datetime.now() - start).total_seconds()
-    print(str(timedelta(seconds = exeTime)))
+    # exeTime = (datetime.now() - start).total_seconds()
+    # print(str(timedelta(seconds = exeTime)))
     
 
 if __name__ == "__main__": main()
